@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atayi Labs – Jede Anfrage sofort beantwortet</title>
+<meta name="description" content="Atayi Labs automatisiert Anfragen für Immobilienmakler: Jede Anfrage landet im CRM und bekommt sofort eine passende Antwort mit Terminvorschlag.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ebe5e3;
+  --surface: #e1dad7;
+  --surface-2: #d6cdc9;
+  --paper: #f6f2f1;
+  --ink: #2b2622;
+  --muted: #6a615d;
+  --accent: #0f7d45;
+  --accent-ink: #ffffff;
+  --seg-1: #c9bdb8;
+  --seg-2: #2b2622;
+  --seg-3: #0f7d45;
+  --seg-4: #a8b8ad;
+
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --step-display: clamp(2.6rem, 9vw, 9.5rem);
+
+  --margin: clamp(16px, 2vw, 28px);
+  --gap-section: clamp(120px, 14vw, 200px);
+  --radius: 14px;
+  --ease: cubic-bezier(.2,.7,.2,1);
+  font-family: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1f1b19; --surface: #2a2522; --surface-2: #352f2b; --paper: #2f2a27;
+    --ink: #efe9e6; --muted: #b3a9a4; --accent: #27a865; --accent-ink: #0d1a12;
+    --seg-1: #4a413c; --seg-2: #efe9e6; --seg-3: #27a865; --seg-4: #5f7466;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1f1b19; --surface: #2a2522; --surface-2: #352f2b; --paper: #2f2a27;
+  --ink: #efe9e6; --muted: #b3a9a4; --accent: #27a865; --accent-ink: #0d1a12;
+  --seg-1: #4a413c; --seg-2: #efe9e6; --seg-3: #27a865; --seg-4: #5f7466;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-size: var(--step-body); line-height: 1.5; letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+::selection { background: var(--accent); color: var(--accent-ink); }
+.wrap { padding-inline: var(--margin); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.display { font-weight: 800; letter-spacing: -0.05em; line-height: 0.92; }
+.head { font-size: var(--step-head); font-weight: 800; letter-spacing: -0.04em; line-height: 0.95; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  min-height: 52px; padding: 0 1.4em; border: 0; border-radius: 0;
+  background: var(--accent); color: var(--accent-ink);
+  font: 600 var(--step-body)/1 inherit; font-family: inherit; text-decoration: none; cursor: pointer;
+  transition: transform .18s var(--ease), background-color .18s var(--ease);
+}
+.btn:hover { background: color-mix(in srgb, var(--accent) 85%, var(--ink)); }
+.btn:active { transform: scale(.97); }
+.btn .arrow { transition: transform .2s var(--ease); }
+.btn:hover .arrow { transform: translateX(4px); }
+.link { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; font-weight: 600; transition: color .15s; }
+.link:hover { color: var(--accent); }
+
+/* ---------- nav ---------- */
+.nav { display: flex; align-items: center; justify-content: space-between; padding-block: 22px; font-weight: 600; font-size: var(--step-small); }
+.nav .mark { font-size: 1rem; font-weight: 800; letter-spacing: -0.03em; text-decoration: none; }
+.nav ul { display: flex; gap: clamp(14px, 2.4vw, 32px); align-items: center; }
+.nav a:not(.mark) { text-decoration: none; transition: color .15s; }
+.nav a:not(.mark):not(.btn):hover { color: var(--accent); }
+.nav .btn { min-height: 40px; font-size: var(--step-small); padding: 0 1em; }
+
+/* ---------- hero ---------- */
+.hero { min-height: 92svh; display: flex; flex-direction: column; }
+.hero-body { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: center; padding-block: 6vh 8vh; }
+.hero h1 { font-size: var(--step-display); }
+.hero h1 .line { display: flex; align-items: baseline; gap: .22em; white-space: nowrap; }
+.hero h1 .slot { flex: 1; height: .78em; align-self: center; min-width: 0; position: relative; }
+.strip {
+  position: absolute; inset: 0; display: block; border-radius: var(--radius);
+  background: var(--ink); color: var(--bg); overflow: hidden;
+  font-size: 1rem; letter-spacing: -0.01em; line-height: 1.3; font-weight: 400;
+}
+.strip .rows { position: absolute; inset: 0; display: grid; align-content: center; }
+.strip .row {
+  grid-area: 1 / 1; display: grid; grid-template-columns: 1fr auto; gap: 14px 18px; align-items: center;
+  padding: 0 clamp(14px, 2vw, 28px); opacity: 0; transform: translateY(40%);
+  transition: opacity .5s var(--ease), transform .5s var(--ease);
+}
+.strip .row.on { opacity: 1; transform: none; }
+.strip .row.off { opacity: 0; transform: translateY(-40%); }
+/* text drawn from data attributes so the headline's own text stays the headline */
+.strip .src::before, .strip .msg::before, .strip small::before, .strip .lbl::before { content: attr(data-t); }
+.strip .src { font-weight: 600; font-size: clamp(.8125rem, 1.1vw, 1rem); color: color-mix(in srgb, var(--bg) 70%, var(--ink)); }
+.strip .msg { font-size: clamp(.9rem, 1.45vw, 1.35rem); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.strip .msg small { display: block; font-weight: 400; font-size: .72em; color: color-mix(in srgb, var(--bg) 70%, var(--ink)); }
+.strip .state { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: clamp(.8125rem, 1.1vw, 1rem); white-space: nowrap; }
+.strip .dot { width: 10px; height: 10px; border-radius: 50%; background: #e0a84a; transition: background-color .3s; }
+.strip .row.done .dot { background: #34c27a; }
+.hero .lead { margin-top: 40px; max-width: 46ch; font-size: var(--step-lead); line-height: 1.35; }
+.hero .actions { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; }
+
+.shutter { clip-path: inset(0 100% 0 0 round var(--radius)); animation: shutter 1.1s var(--ease) .25s forwards; }
+.shutter .rows { transform: scale(1.12); animation: settle 1.3s var(--ease) .25s forwards; }
+@keyframes shutter { to { clip-path: inset(0 0 0 0 round var(--radius)); } }
+@keyframes settle { to { transform: none; } }
+
+/* ---------- intro: the weekend inbox ---------- */
+section { scroll-margin-top: 24px; }
+.split { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(16px, 2vw, 32px); align-items: start; }
+.intro { margin-top: var(--gap-section); }
+.intro .text { grid-column: 1 / 6; }
+.intro h2 { margin-bottom: 28px; }
+.intro .text p + p { margin-top: 18px; }
+.intro .statement { font-size: var(--step-lead); line-height: 1.35; }
+.inbox { grid-column: 7 / 13; background: var(--paper); border-radius: var(--radius); overflow: hidden; font-size: 15px; line-height: 1.35; }
+.inbox header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--surface-2); font-weight: 600; }
+.inbox header span:last-child { color: var(--ink); font-weight: 400; }
+.inbox li { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; padding: 14px 20px; border-top: 1px solid var(--surface); } /* taste-skill-ignore: interface fragment */
+.inbox li b { font-weight: 600; }
+.inbox li .when { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.inbox li .sub { color: var(--muted); grid-column: 1 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inbox li.unread b::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #d9534f; margin-right: 8px; vertical-align: middle; }
+.inbox footer { padding: 14px 20px; background: var(--surface); color: var(--ink); }
+
+/* ---------- showcase: type an inquiry ---------- */
+.showcase { margin-top: var(--gap-section); }
+.showcase h2 { max-width: 16ch; }
+.ask { margin-top: 40px; display: flex; align-items: center; background: var(--surface); padding: 6px clamp(14px, 2vw, 24px); }
+.ask input {
+  flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink);
+  font: 800 clamp(1.75rem, 5.2vw, 5.5rem)/1.1 "Schibsted Grotesk", system-ui, sans-serif; letter-spacing: -0.04em;
+  padding: .12em 0; caret-color: var(--accent);
+}
+.ask input:focus { outline: none; }
+.ask:focus-within { outline: 3px solid var(--accent); outline-offset: 3px; }
+.examples { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+.examples button {
+  font: 600 var(--step-small)/1.2 inherit; font-family: inherit; color: var(--ink);
+  background: var(--surface); border: 0; padding: 12px 16px; min-height: 44px; cursor: pointer;
+  transition: background-color .15s, transform .15s var(--ease);
+}
+.examples button:hover { background: var(--surface-2); }
+.examples button:active { transform: scale(.97); }
+.examples button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.result { margin-top: 48px; display: grid; grid-template-columns: 7fr 5fr; gap: clamp(16px, 2vw, 32px); align-items: start; }
+.panel { background: var(--paper); border-radius: var(--radius); overflow: hidden; font-size: 15px; line-height: 1.5; }
+.panel .bar { display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; background: var(--surface-2); font-weight: 600; }
+.panel .bar span:last-child { color: var(--ink); font-weight: 400; }
+.mail dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; padding: 16px 20px 12px; border-bottom: 1px solid var(--surface); } /* taste-skill-ignore: interface fragment */
+.mail dt { color: var(--muted); }
+.mail dd { font-weight: 600; }
+.mail .body { padding: 18px 20px 22px; white-space: pre-line; min-height: 15em; }
+.mail .slot { display: inline-block; margin-top: 12px; background: var(--accent); color: var(--accent-ink); padding: 8px 14px; font-weight: 600; text-decoration: none; }
+.crm .fields { padding: 8px 20px 4px; }
+.crm .fields div { display: grid; grid-template-columns: 9em 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--surface); } /* taste-skill-ignore: interface fragment */
+.crm .fields div:last-child { border-bottom: 0; }
+.crm .fields span { color: var(--muted); }
+.crm .fields .tag { color: var(--accent-ink); }
+.crm .fields b { font-weight: 600; }
+.tag { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.crm .task { margin: 8px 20px 20px; padding: 14px 16px; background: var(--surface); }
+.crm .task b { display: block; }
+.crm .task span { color: var(--muted); }
+.flash { animation: flash .6s var(--ease); }
+@keyframes flash { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.note { margin-top: 20px; color: var(--muted); font-size: var(--step-small); max-width: 70ch; }
+
+/* ---------- how it works: one bar ---------- */
+.how { margin-top: var(--gap-section); }
+.how h2 { font-size: clamp(2.4rem, 6.4vw, 6.5rem); margin-bottom: 64px; }
+.stages { display: flex; gap: 6px; }
+.stage { min-width: 12%; display: flex; flex-direction: column; }
+.stage .seg { height: 22vh; min-height: 150px; padding: 20px; font-size: clamp(1.25rem, 2vw, 1.875rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; transform-origin: left; }
+.stage:nth-child(1) .seg { background: var(--seg-1); color: var(--ink); }
+.stage:nth-child(2) .seg { background: var(--seg-2); color: var(--bg); }
+.stage:nth-child(3) .seg { background: var(--seg-3); color: var(--accent-ink); }
+.stage:nth-child(4) .seg { background: var(--seg-4); color: var(--ink); }
+.stage h3 { margin-top: 18px; font-size: var(--step-body); font-weight: 800; }
+.stage p { margin-top: 6px; max-width: 26ch; }
+.how .after { margin-top: 56px; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(16px, 2vw, 32px); }
+.how .after p { grid-column: 1 / 7; font-size: var(--step-lead); line-height: 1.35; }
+.how .after ul { grid-column: 8 / 13; }
+.how .after li { padding: 12px 0; font-weight: 600; }
+.how .after li + li { border-top: 0; }
+.how .after li span { display: block; font-weight: 400; }
+
+/* ---------- pricing ---------- */
+.pricing { margin-top: var(--gap-section); background: var(--surface); padding-block: clamp(80px, 10vw, 140px); min-height: 80svh; display: flex; flex-direction: column; justify-content: center; }
+.pricing h2 { font-size: clamp(2.6rem, 8.4vw, 8.8rem); }
+.price { display: inline-block; background: var(--accent); color: var(--accent-ink); padding: 0 .15em; }
+.pricing .base { margin-top: 64px; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(16px, 2vw, 32px); align-items: end; }
+.pricing .base p { grid-column: 1 / 7; font-size: var(--step-lead); line-height: 1.35; }
+.pricing .base .go { grid-column: 9 / 13; justify-self: end; text-align: right; }
+.terms { margin-top: 64px; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 32px); }
+.terms div { background: var(--bg); padding: 24px; }
+.terms b { display: block; font-size: var(--step-lead); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+.terms p { margin-top: 10px; }
+
+/* ---------- faq ---------- */
+.faq { margin-top: var(--gap-section); }
+.faq .row { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(16px, 2vw, 32px); align-items: baseline; }
+.faq .row + .row { margin-top: clamp(56px, 6vw, 84px); }
+.faq h2, .faq h3 { grid-column: 1 / 7; font-size: clamp(1.5rem, 2.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
+.faq h2 { color: var(--muted); }
+.faq .row p { grid-column: 8 / 13; max-width: 40ch; line-height: 1.55; }
+
+/* ---------- footer ---------- */
+.foot { margin-top: var(--gap-section); background: var(--ink); color: var(--bg); overflow: hidden; min-height: 100svh; display: flex; flex-direction: column; padding-top: clamp(72px, 9vw, 128px); }
+.foot .top { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: clamp(16px, 2vw, 32px); }
+.foot .invite { grid-column: 1 / 10; }
+.foot h2 { font-size: clamp(2.4rem, 5.6vw, 6rem); }
+.foot .invite p { margin-top: 24px; max-width: 44ch; font-size: var(--step-lead); line-height: 1.35; color: color-mix(in srgb, var(--bg) 85%, var(--ink)); }
+.foot .invite .btn { margin-top: 36px; }
+.foot nav { grid-column: 10 / 13; }
+.foot nav li + li { margin-top: 10px; }
+.foot nav a { text-decoration: none; font-weight: 600; transition: color .15s; }
+.foot nav a:hover { color: #7fd6a6; }
+.foot .legal { margin-top: auto; padding-top: 80px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-size: var(--step-small); color: color-mix(in srgb, var(--bg) 75%, var(--ink)); }
+.foot .legal a { color: inherit; }
+.foot .word { font-size: clamp(6rem, 27vw, 30rem); font-weight: 800; letter-spacing: -0.06em; line-height: .8; white-space: nowrap; transform: translateY(22%); margin-top: 12px; margin-left: -.04em; }
+
+/* ---------- reveal ---------- */
+.js .rv { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--ease), transform .7s var(--ease); transition-delay: calc(var(--i, 0) * 80ms); }
+.js .rv.in { opacity: 1; transform: none; }
+.js .stage .seg.rv { transform: scaleX(.2); }
+.js .stage .seg.rv.in { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .shutter, .shutter .rows { animation: none; clip-path: none; transform: none; }
+  .js .rv, .js .stage .seg.rv { opacity: 1; transform: none; transition: opacity .2s; }
+  .strip .row { transition: opacity .2s; transform: none; }
+  .flash { animation: none; }
+}
+
+/* ---------- tablet ---------- */
+@media (max-width: 980px) {
+  .intro .text, .inbox { grid-column: 1 / -1; }
+  .inbox { margin-top: 40px; }
+  .result { grid-template-columns: 1fr; }
+  .how .after p, .how .after ul { grid-column: 1 / -1; }
+  .how .after ul { margin-top: 24px; }
+  .terms { grid-template-columns: 1fr; }
+  .pricing .base p { grid-column: 1 / -1; }
+  .pricing .base .go { grid-column: 1 / -1; justify-self: start; text-align: left; margin-top: 28px; }
+  .foot .invite { grid-column: 1 / -1; }
+  .foot nav { grid-column: 1 / -1; margin-top: 48px; }
+  .foot nav ul { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  .foot nav li + li { margin-top: 0; }
+}
+
+/* ---------- phone ---------- */
+@media (max-width: 640px) {
+  .nav ul li.opt { display: none; }
+  .hero h1 { font-size: 10.4vw; }
+  .hero h1 .line { display: block; }
+  .hero h1 .l1 .slot { display: block; height: auto; aspect-ratio: 2 / 1; margin: 18px 0; }
+  .strip .row { grid-template-columns: 1fr; gap: 6px; }
+  .strip .msg { white-space: normal; font-size: 1.05rem; }
+  .hero .lead { margin-top: 28px; font-size: 1.125rem; }
+  .ask input { font-size: 8.5vw; }
+  .stages { flex-direction: column; }
+  .stage .seg { height: auto; min-height: 72px; }
+  .stage:nth-child(4) .seg { min-height: 120px; }
+  .stage h3 { margin-top: 12px; }
+  .stage { margin-bottom: 18px; }
+  .how h2 { font-size: 11vw; }
+  .pricing h2 { font-size: 11.5vw; }
+  .pricing .base .go { width: 100%; }
+  .pricing .base .btn { width: 100%; }
+  .faq .row { display: block; }
+  .faq .row p { margin-top: 12px; }
+  .faq h2, .faq h3 { font-size: 1.5rem; }
+  .foot h2 { font-size: 11vw; }
+  .foot .btn { width: 100%; }
+  .foot .word { font-size: 34vw; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero wrap">
+  <nav class="nav" aria-label="Hauptnavigation">
+    <a class="mark" href="#top" id="top">Atayi Labs</a>
+    <ul>
+      <li class="opt"><a href="#ausprobieren">Ausprobieren</a></li>
+      <li class="opt"><a href="#ablauf">Ablauf</a></li>
+      <li><a href="#preis">Preis</a></li>
+      <li class="opt"><a href="#fragen">Fragen</a></li>
+      <li><a class="btn" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">Gespräch buchen</a></li>
+    </ul>
+  </nav>
+
+  <div class="hero-body">
+    <h1 class="display">
+      <span class="line l1">Jede Anfrage <span class="slot"><span class="strip shutter" data-ui aria-hidden="true"><span class="rows" id="strip"></span></span></span></span>
+      <span class="line">sofort beantwortet.</span>
+    </h1>
+    <p class="lead">Atayi Labs automatisiert die Anfragen von Immobilienmaklern: Jede Anfrage landet in Ihrem CRM und bekommt sofort eine passende Antwort mit Terminvorschlag.</p>
+    <div class="actions">
+      <a class="btn" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">15 Minuten Gespräch buchen <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="link" href="#ausprobieren">Erst ausprobieren</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="intro wrap split" aria-labelledby="h-intro">
+    <div class="text">
+      <h2 id="h-intro" class="head rv">Sonntag, 21:47 Uhr.</h2>
+      <p class="statement rv" style="--i:1">Anfragen kommen über Ihre Website, ImmoScout24 und Immowelt. Oft dann, wenn Sie gerade besichtigen, telefonieren oder Feierabend haben.</p>
+      <p class="rv" style="--i:2">Bis Montagmorgen liegen sie in drei Postfächern, keiner ist im CRM, und der Interessent hat längst beim nächsten Büro nachgefragt. Genau diese Lücke schließe ich: Die erste Antwort geht raus, während Sie noch nicht einmal wissen, dass die Anfrage da ist.</p>
+    </div>
+    <div class="inbox rv" style="--i:2" data-ui role="img" aria-label="Beispiel-Postfach mit vier unbeantworteten Anfragen vom Wochenende">
+      <header><span>Posteingang · Anfragen</span><span>4 ungelesen</span></header>
+      <ul>
+        <li class="unread"><b>ImmoScout24 · Anna Kaya</b><span class="when">So 21:47</span><span class="sub">Ist die 3-Zimmer-Wohnung in der Lindenstraße noch verfügbar?</span></li>
+        <li class="unread"><b>Website-Formular · Familie Berger</b><span class="when">So 18:12</span><span class="sub">Wir überlegen, unser Reihenhaus zu verkaufen. Können Sie uns beraten?</span></li>
+        <li class="unread"><b>Immowelt · Jonas Weber</b><span class="when">Sa 22:05</span><span class="sub">Bitte um Exposé und einen Besichtigungstermin für das Einfamilienhaus.</span></li>
+        <li class="unread"><b>Website-Formular · Petra Lang</b><span class="when">Sa 09:30</span><span class="sub">Was ist meine geerbte Eigentumswohnung ungefähr wert?</span></li>
+        <li><b>Kollege · Übergabe</b><span class="when">Fr 17:58</span><span class="sub">Schlüssel für die Besichtigung am Dienstag liegen im Büro.</span></li>
+      </ul>
+      <footer>Beantwortet am Wochenende: 0 von 4</footer>
+    </div>
+  </section>
+
+  <section class="showcase wrap" id="ausprobieren" aria-labelledby="h-try">
+    <h2 id="h-try" class="head rv">Schreiben Sie eine Anfrage.</h2>
+    <label class="visually-hidden" for="q">Anfrage eines Interessenten</label>
+    <div class="ask rv" style="--i:1" data-ui>
+      <input id="q" type="text" value="Was ist mein Haus wert?" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="examples rv" style="--i:2" role="group" aria-label="Beispielanfragen">
+      <button type="button" data-q="Ist die Wohnung in der Lindenstraße noch frei?">Käufer</button>
+      <button type="button" data-q="Wir möchten unser Haus verkaufen.">Verkäufer</button>
+      <button type="button" data-q="Was ist mein Haus wert?">Bewertung</button>
+      <button type="button" data-q="Ich habe eine Wohnung geerbt und brauche Beratung.">Beratung</button>
+    </div>
+
+    <div class="result" aria-live="polite">
+      <article class="panel mail rv" style="--i:3" data-ui aria-label="Automatische Antwort-E-Mail">
+        <div class="bar"><span>Antwort an den Interessenten</span><span id="sent">gesendet 21:47</span></div>
+        <dl>
+          <dt>An</dt><dd>interessent@beispiel.de</dd>
+          <dt>Betreff</dt><dd id="subject">Ihre Anfrage zur Immobilienbewertung</dd>
+        </dl>
+        <div class="body" id="body"></div>
+      </article>
+      <article class="panel crm rv" style="--i:4" data-ui aria-label="Neuer Eintrag im CRM">
+        <div class="bar"><span>Neuer Kontakt im CRM</span><span>automatisch</span></div>
+        <div class="fields">
+          <div><span>Anfrageart</span><b><span class="tag" id="kind">Bewertung</span></b></div>
+          <div><span>Quelle</span><b>Website-Formular</b></div>
+          <div><span>Nachricht</span><b id="said">Was ist mein Haus wert?</b></div>
+          <div><span>Einwilligung</span><b>DSGVO bestätigt</b></div>
+        </div>
+        <div class="task"><b id="task">Aufgabe: Bewertungstermin vorbereiten</b><span>für Sie, im CRM</span></div>
+      </article>
+    </div>
+    <p class="note">Beispieltexte. Die Antworten für Käufer, Verkäufer, Bewertung und Beratung schreiben wir gemeinsam in Ihrem Ton, mit Ihrem Namen und Ihrem Terminkalender.</p>
+  </section>
+
+  <section class="how wrap" id="ablauf" aria-labelledby="h-how">
+    <h2 id="h-how" class="display rv">Vom Gespräch zum Go-live.</h2>
+    <ol class="stages" data-ui>
+      <li class="stage" style="flex-grow:2">
+        <div class="seg rv">Gemeinsam</div>
+        <h3>Analyse und Konzept</h3>
+        <p>Wir schauen, woher Ihre Anfragen kommen, welches CRM Sie nutzen und wie Ihre Antworten klingen sollen.</p>
+      </li>
+      <li class="stage" style="flex-grow:3">
+        <div class="seg rv" style="--i:1">Atayi Labs</div>
+        <h3>Umsetzung und Test</h3>
+        <p>Ich baue die Automatisierung in Ihren eigenen Konten und teste jede Anfrageart mit echten Probeanfragen.</p>
+      </li>
+      <li class="stage" style="flex-grow:2">
+        <div class="seg rv" style="--i:2">Sie starten</div>
+        <h3>Übergabe und Go-live</h3>
+        <p>Sie sehen jede Antwort, bevor sie live geht. Bezahlt wird erst danach.</p>
+      </li>
+      <li class="stage" style="flex-grow:4">
+        <div class="seg rv" style="--i:3">Laufend, wenn Sie möchten</div>
+        <h3>Betreuung</h3>
+        <p>Ich überwache die Abläufe, behebe Fehler und passe Kleinigkeiten an. Monatlich kündbar.</p>
+      </li>
+    </ol>
+    <div class="after">
+      <p class="rv">Die Automatisierung läuft in Ihrem Konto, nicht in meinem. Wenn wir aufhören zusammenzuarbeiten, gehört sie weiter Ihnen.</p>
+      <ul class="rv" style="--i:1">
+        <li>Was ich von Ihnen brauche<span>Zugang zu Ihrem CRM und Ihren Anfragequellen sowie die Freigabe Ihres Gmail- oder Outlook-Postfachs für die Antworten.</span></li>
+        <li>Was Sie danach haben<span>Ein Anfrageformular, automatische CRM-Einträge, Antworten mit Terminvorschlag und eine Aufgabe für jede neue Anfrage.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pricing" id="preis" aria-labelledby="h-price">
+    <div class="wrap">
+      <h2 id="h-price" class="display rv">Startklar für <span class="price">690&nbsp;€</span> einmalig.</h2>
+      <div class="base">
+        <p class="rv" style="--i:1">Enthalten: Anfrageformular, automatischer CRM-Eintrag, Antwort-E-Mails für Käufer, Verkäufer, Bewertung und Beratung mit Terminvorschlag und eine Aufgabe im CRM. Fällig erst nach Go-live, mit 14 Tagen Zahlungsziel.</p>
+        <div class="go rv" style="--i:2"><a class="btn" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">Gespräch buchen <span class="arrow" aria-hidden="true">→</span></a></div>
+      </div>
+      <div class="terms">
+        <div class="rv" style="--i:1"><b>Pilotkunden: 345&nbsp;€</b><p>Atayi Labs ist neu. Wenige Pilotkunden bekommen 50&nbsp;% auf die Einrichtung und geben mir dafür ehrliches Feedback und eine Referenz.</p></div>
+        <div class="rv" style="--i:2"><b>Anderes CRM: +290&nbsp;€</b><p>HubSpot ist inklusive. Für onOffice, Propstack, FlowFact oder ein anderes CRM kommt einmalig ein Aufpreis hinzu.</p></div>
+        <div class="rv" style="--i:3"><b>Betreuung: 99&nbsp;€ im Monat</b><p>Optional. Überwachung, Fehlerbehebung am selben oder nächsten Werktag, eine kleine Änderung pro Monat und ein Monatsbericht.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq wrap" id="fragen" aria-labelledby="h-faq">
+    <div class="row"><h2 id="h-faq" class="rv">Ihre Fragen</h2></div>
+    <div class="row">
+      <h3 class="rv">Funktioniert das mit meinem CRM?</h3>
+      <p class="rv" style="--i:1">Am einfachsten mit HubSpot, das ist im Preis enthalten. onOffice, Propstack, FlowFact und andere Systeme binde ich ebenfalls an; dafür fallen einmalig 290&nbsp;€ zusätzlich an.</p>
+    </div>
+    <div class="row">
+      <h3 class="rv">Was ist mit ImmoScout24 und Immowelt?</h3>
+      <p class="rv" style="--i:1">Portalanfragen werden über die Benachrichtigungs-E-Mails der Portale eingelesen, nicht über eine Portal-Schnittstelle. Das biete ich als Erweiterung zum Festpreis an, den wir im Gespräch klären.</p>
+    </div>
+    <div class="row">
+      <h3 class="rv">Wo liegen die Daten meiner Interessenten?</h3>
+      <p class="rv" style="--i:1">In Ihren eigenen Konten: in Ihrem CRM, Ihrem Postfach und Ihrem eigenen Automatisierungskonto. Die Einwilligung nach DSGVO ist im Anfrageformular enthalten.</p>
+    </div>
+    <div class="row">
+      <h3 class="rv">Wann muss ich bezahlen?</h3>
+      <p class="rv" style="--i:1">Die Einrichtung zu 100&nbsp;% erst nach Go-live, mit 14 Tagen Zahlungsziel. Die Betreuung wird ab Go-live zum Monatsende abgerechnet.</p>
+    </div>
+    <div class="row">
+      <h3 class="rv">Wie komme ich aus der Betreuung wieder raus?</h3>
+      <p class="rv" style="--i:1">Es gibt keine Mindestlaufzeit. Sie kündigen mit 14 Tagen Frist zum Monatsende, eine E-Mail genügt. Größere Erweiterungen biete ich immer separat zum Festpreis an.</p>
+    </div>
+    <div class="row">
+      <h3 class="rv">Muss ich mich mit Technik auskennen?</h3>
+      <p class="rv" style="--i:1">Nein. Ich richte alles ein, zeige Ihnen jeden Schritt bei der Übergabe und bin bei Fragen innerhalb von 24 Stunden erreichbar, wenn Sie die Betreuung nutzen.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap top">
+    <div class="invite">
+      <h2 class="display rv">Keine Anfrage bleibt liegen.</h2>
+      <p class="rv" style="--i:1">In 15 Minuten klären wir, wie Anfragen heute bei Ihnen ankommen und ob die Automatisierung zu Ihrem Büro passt.</p>
+      <a class="btn rv" style="--i:2" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">Gespräch buchen <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+    <nav aria-label="Fußzeile">
+      <ul>
+        <li><a href="#ausprobieren">Ausprobieren</a></li>
+        <li><a href="#ablauf">Ablauf</a></li>
+        <li><a href="#preis">Preis</a></li>
+        <li><a href="#fragen">Fragen</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="wrap legal">
+    <span>© 2026 Atayi Labs · Hadi</span>
+    <span><a href="#impressum">Impressum</a> · <a href="#datenschutz">Datenschutz</a></span>
+  </div>
+  <div class="wrap" aria-hidden="true"><div class="word">Atayi Labs</div></div>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+
+/* hero strip: inquiries arrive and get answered */
+(function () {
+
+  const items = [
+    ['ImmoScout24', 'Anna Kaya', 'Ist die 3-Zimmer-Wohnung noch frei?', '21:47'],
+    ['Website', 'Familie Berger', 'Wir möchten unser Reihenhaus verkaufen.', '18:12'],
+    ['Immowelt', 'Jonas Weber', 'Bitte um Exposé und Besichtigung.', '22:05'],
+    ['Website', 'Petra Lang', 'Was ist meine Wohnung wert?', '09:30']
+  ];
+  const box = document.getElementById('strip');
+  const rows = items.map(([src, name, msg, t]) => {
+    const r = document.createElement('span');
+    r.className = 'row';
+    r.innerHTML = '<span class="msg"><small></small></span><span class="state"><span class="dot"></span><span class="lbl"></span></span>';
+    r.querySelector('.msg').dataset.t = msg; r.querySelector('small').dataset.t = src + ' · ' + name + ' · ' + t;
+    box.appendChild(r);
+    return r;
+  });
+  let i = 0;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function show() {
+    rows.forEach((r) => r.classList.remove('on', 'off', 'done'));
+    const r = rows[i];
+    r.querySelector('.lbl').dataset.t = 'Neu';
+    r.classList.add('on');
+    setTimeout(() => { r.classList.add('done'); r.querySelector('.lbl').dataset.t = 'Beantwortet ' + items[i][3]; }, reduce ? 0 : 1100);
+    setTimeout(() => { r.classList.add('off'); i = (i + 1) % rows.length; setTimeout(show, 350); }, 3400);
+  }
+  show();
+})();
+
+/* showcase: classify the typed inquiry and draft the reply */
+(function () {
+  const q = document.getElementById('q');
+  const kinds = {
+    Bewertung: {
+      test: /wert|bewert|schätz|preis (für|meine)|was bringt/i,
+      subject: 'Ihre Anfrage zur Immobilienbewertung',
+      body: 'Guten Tag,\n\nvielen Dank für Ihre Anfrage. Gerne schätze ich den Wert Ihrer Immobilie ein. Für eine fundierte Bewertung schaue ich sie mir am liebsten vor Ort an.\n\nWählen Sie einfach einen passenden Termin:',
+      task: 'Aufgabe: Bewertungstermin vorbereiten'
+    },
+    Verkäufer: {
+      test: /verkauf|veräußer|inserier|loswerden|vermarkt/i,
+      subject: 'Ihr Verkaufsvorhaben',
+      body: 'Guten Tag,\n\nvielen Dank für Ihr Vertrauen. Ein Immobilienverkauf beginnt mit einem guten Gespräch: über Ihre Immobilie, Ihren Zeitplan und Ihre Vorstellungen.\n\nWählen Sie einfach einen passenden Termin:',
+      task: 'Aufgabe: Erstgespräch mit Verkäufer'
+    },
+    Käufer: {
+      test: /frei|verfügbar|besichtig|exposé|expose|kaufen|wohnung|haus|objekt|zimmer/i,
+      subject: 'Ihre Anfrage zum Objekt',
+      body: 'Guten Tag,\n\nvielen Dank für Ihr Interesse. Das Exposé finden Sie im Anhang. Gerne zeige ich Ihnen die Immobilie persönlich.\n\nWählen Sie einfach einen passenden Besichtigungstermin:',
+      task: 'Aufgabe: Besichtigung bestätigen'
+    },
+    Beratung: {
+      test: /beratung|berat|geerbt|erbe|erbschaft|finanzier|scheidung|frage/i,
+      subject: 'Ihre Anfrage',
+      body: 'Guten Tag,\n\nvielen Dank für Ihre Nachricht. Am besten klären wir Ihre Frage in einem kurzen Gespräch, ganz unverbindlich.\n\nWählen Sie einfach einen passenden Termin:',
+      task: 'Aufgabe: Beratungsgespräch führen'
+    }
+  };
+  const order = ['Bewertung', 'Verkäufer', 'Beratung', 'Käufer'];
+  const $ = (id) => document.getElementById(id);
+  const buttons = [...document.querySelectorAll('.examples button')];
+  let last = '';
+  function render() {
+    const text = q.value.trim();
+    const kind = (text && order.find((k) => kinds[k].test.test(text))) || 'Beratung';
+    const k = kinds[kind];
+    $('kind').textContent = kind;
+    $('said').textContent = text || '–';
+    $('subject').textContent = k.subject;
+    $('task').textContent = k.task;
+    const now = new Date();
+    $('sent').textContent = 'gesendet ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    const body = $('body');
+    body.textContent = k.body + '\n';
+    const a = document.createElement('a');
+    a.className = 'slot'; a.href = '#ausprobieren'; a.textContent = 'Termin wählen';
+    a.addEventListener('click', (e) => e.preventDefault());
+    body.appendChild(a);
+    body.appendChild(document.createTextNode('\n\nMit freundlichen Grüßen\nIhr Maklerbüro'));
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.textContent === kind)));
+    if (kind !== last) {
+      document.querySelectorAll('.result .panel').forEach((p) => { p.classList.remove('flash'); void p.offsetWidth; p.classList.add('flash'); });
+      last = kind;
+    }
+  }
+  q.addEventListener('input', render);
+  buttons.forEach((b) => b.addEventListener('click', () => { q.value = b.dataset.q; render(); }));
+  render();
+})();
+
+/* staggered entrances */
+(function () {
+  const els = document.querySelectorAll('.rv');
+  if (!('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { rootMargin: '0px 0px -8% 0px' });
+  els.forEach((e) => io.observe(e));
+})();
+</script>
+</body>
+</html>
