@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>MCP erklärt</title>
+<style>
+  html, body { margin: 0; background: #0f1216; }
+  canvas { display: block; width: 360px; height: 640px; }
+  body.render canvas { width: 1080px; height: 1920px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+const W = 1080, H = 1920, DURATION = 63;
+const C = {
+  bg: '#0f1216', panel: '#1a1f26', panel2: '#232a33', ink: '#f2efe9', soft: '#a9b0b8',
+  green: '#2fbf71', red: '#e0605a', amber: '#e8b04b', blue: '#5aa9e6'
+};
+const FONT = 'Inter, "DejaVu Sans", sans-serif';
+const MONO = '"DejaVu Sans Mono", monospace';
+const ctx = document.getElementById('c').getContext('2d');
+
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const lerp = (a, b, x) => a + (b - a) * x;
+// visibility of a scene with fade in/out
+const vis = (t, a, b, f = .45) => Math.min(prog(t, a, a + f), 1 - prog(t, b - f, b));
+
+function rrect(x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function box(x, y, w, h, fill, r = 22, stroke) {
+  rrect(x, y, w, h, r); ctx.fillStyle = fill; ctx.fill();
+  if (stroke) { ctx.lineWidth = 4; ctx.strokeStyle = stroke; ctx.stroke(); }
+}
+function lines(str, size, maxW, weight = 400, font = FONT) {
+  ctx.font = `${weight} ${size}px ${font}`;
+  const out = [];
+  for (const para of str.split('\n')) {
+    let cur = '';
+    for (const word of para.split(' ')) {
+      const test = cur ? cur + ' ' + word : word;
+      if (ctx.measureText(test).width > maxW && cur) { out.push(cur); cur = word; } else cur = test;
+    }
+    out.push(cur);
+  }
+  return out;
+}
+// draws wrapped text; a = alpha, rise = upward offset while fading in
+function text(str, x, y, { size = 40, weight = 400, color = C.ink, align = 'left', maxW = 920, lh = 1.25, a = 1, font = FONT } = {}) {
+  if (a <= 0) return 0;
+  const ls = lines(str, size, maxW, weight, font);
+  ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'top';
+  ctx.font = `${weight} ${size}px ${font}`;
+  if (font === FONT) ctx.letterSpacing = size > 60 ? '-2px' : '0px';
+  const dy = (1 - easeOut(clamp(a))) * 24;
+  ls.forEach((l, i) => ctx.fillText(l, x, y + dy + i * size * lh));
+  ctx.restore();
+  return ls.length * size * lh;
+}
+function arrow(x1, y1, x2, y2, p, color, width = 6) {
+  if (p <= 0) return;
+  const x = lerp(x1, x2, p), y = lerp(y1, y2, p);
+  ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x, y); ctx.stroke();
+  const ang = Math.atan2(y2 - y1, x2 - x1), s = 22;
+  ctx.beginPath(); ctx.moveTo(x, y);
+  ctx.lineTo(x - s * Math.cos(ang - .45), y - s * Math.sin(ang - .45));
+  ctx.lineTo(x - s * Math.cos(ang + .45), y - s * Math.sin(ang + .45));
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function line(x1, y1, x2, y2, p, color, width = 5) {
+  if (p <= 0) return;
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(lerp(x1, x2, p), lerp(y1, y2, p)); ctx.stroke(); ctx.restore();
+}
+function withAlpha(a, fn) { if (a <= 0) return; ctx.save(); ctx.globalAlpha *= clamp(a); fn(); ctx.restore(); }
+function pop(a, cx, cy, fn) { // scale-in around a centre
+  if (a <= 0) return;
+  const s = lerp(.85, 1, easeOut(clamp(a)));
+  ctx.save(); ctx.globalAlpha *= clamp(a); ctx.translate(cx, cy); ctx.scale(s, s); ctx.translate(-cx, -cy); fn(); ctx.restore();
+}
+
+/* ---------------- scene 1: hook ---------------- */
+function s1(t) {
+  const v = vis(t, 0, 5.2);
+  withAlpha(v, () => {
+    text('Wie spricht eine KI mit deinen Apps?', 80, 640, { size: 112, weight: 800, a: prog(t, .2, .9), lh: 1.02 });
+    text('MCP in 60 Sekunden erklärt.', 80, 1130, { size: 52, weight: 500, color: C.green, a: prog(t, 1.2, 1.9) });
+    // little app chips
+    const chips = ['Gmail', 'Kalender', 'CRM', 'Dateien', 'Datenbank'];
+    let x = 80, y = 1300;
+    chips.forEach((c, i) => {
+      const a = prog(t, 2 + i * .2, 2.5 + i * .2);
+      ctx.font = `600 40px ${FONT}`; const w = ctx.measureText(c).width + 56;
+      if (x + w > 1000) { x = 80; y += 100; }
+      pop(a, x + w / 2, y + 40, () => { box(x, y, w, 80, C.panel2, 40); text(c, x + w / 2, y + 18, { size: 40, weight: 600, align: 'center' }); });
+      x += w + 18;
+    });
+  });
+}
+
+/* ---------------- scene 2 + 3: problem → hub ---------------- */
+const AIS = ['KI-App A', 'KI-App B', 'KI-App C'];
+const TOOLS = ['Gmail', 'Kalender', 'CRM', 'Datenbank'];
+const BW = 250, BH = 110, AX = 60, TX = W - 60 - BW;
+const aiY = (i) => 700 + i * 220, toolY = (i) => 600 + i * 200;
+function s23(t) {
+  const v = vis(t, 5, 22.2);
+  if (v <= 0) return;
+  withAlpha(v, () => {
+    const toHub = prog(t, 14, 15.2);
+    // titles
+    withAlpha(1 - toHub, () => {
+      text('Das Problem', 80, 220, { size: 84, weight: 800, a: prog(t, 5.2, 5.8) });
+      text('Ohne Standard braucht jede KI für jedes Tool eine eigene Anbindung.', 80, 340, { size: 44, color: C.soft, a: prog(t, 5.8, 6.5) });
+    });
+    withAlpha(toHub, () => {
+      text('Die Lösung: MCP', 80, 220, { size: 84, weight: 800, color: C.green, a: toHub });
+      text('Model Context Protocol – ein offener Standard. Wie USB-C, nur für KI.', 80, 340, { size: 44, color: C.soft, a: prog(t, 14.6, 15.4) });
+    });
+    // red mesh
+    withAlpha(1 - prog(t, 14, 14.8), () => {
+      let k = 0;
+      AIS.forEach((_, i) => TOOLS.forEach((_, j) => {
+        const a = prog(t, 7 + k * .25, 7.5 + k * .25); k++;
+        line(AX + BW, aiY(i) + BH / 2, TX, toolY(j) + BH / 2, easeOut(a), C.red, 5);
+      }));
+    });
+    // green hub lines
+    const hx = W / 2, hy = 960;
+    AIS.forEach((_, i) => line(AX + BW, aiY(i) + BH / 2, hx, hy, easeOut(prog(t, 15.6 + i * .2, 16.3 + i * .2)), C.green, 7));
+    TOOLS.forEach((_, j) => line(hx, hy, TX, toolY(j) + BH / 2, easeOut(prog(t, 16.2 + j * .2, 16.9 + j * .2)), C.green, 7));
+    // hub
+    pop(prog(t, 14.8, 15.6), hx, hy, () => {
+      ctx.beginPath(); ctx.arc(hx, hy, 115, 0, Math.PI * 2); ctx.fillStyle = C.green; ctx.fill();
+      text('MCP', hx, hy - 34, { size: 64, weight: 800, align: 'center', color: '#0b1a12' });
+    });
+    // boxes
+    AIS.forEach((n, i) => pop(prog(t, 5.6 + i * .15, 6.2 + i * .15), AX + BW / 2, aiY(i) + BH / 2, () => {
+      box(AX, aiY(i), BW, BH, C.blue); text(n, AX + BW / 2, aiY(i) + 32, { size: 40, weight: 700, align: 'center', color: '#08121b' });
+    }));
+    TOOLS.forEach((n, j) => pop(prog(t, 6.1 + j * .15, 6.7 + j * .15), TX + BW / 2, toolY(j) + BH / 2, () => {
+      box(TX, toolY(j), BW, BH, C.panel2); text(n, TX + BW / 2, toolY(j) + 32, { size: 40, weight: 700, align: 'center' });
+    }));
+    // counters
+    withAlpha(prog(t, 10.5, 11.2) * (1 - toHub), () => {
+      text('3 × 4 = 12 Anbindungen', W / 2, 1480, { size: 64, weight: 800, align: 'center', color: C.red });
+      text('Und jede muss einzeln gebaut und gepflegt werden.', W / 2, 1580, { size: 40, align: 'center', color: C.soft, a: prog(t, 11.5, 12.2) });
+    });
+    withAlpha(prog(t, 17.5, 18.2), () => {
+      text('3 + 4 = 7 Anbindungen', W / 2, 1480, { size: 64, weight: 800, align: 'center', color: C.green });
+      text('Jedes Tool baut einmal einen MCP-Server – und jede KI mit MCP-Unterstützung kann ihn nutzen.', W / 2, 1580, { size: 40, align: 'center', color: C.soft, maxW: 900, a: prog(t, 18.5, 19.2) });
+      text('Vorgestellt von Anthropic im November 2024', W / 2, 1780, { size: 32, align: 'center', color: C.soft, a: prog(t, 19.5, 20.2) });
+    });
+  });
+}
+
+/* ---------------- scene 4: architecture ---------------- */
+function s4(t) {
+  const v = vis(t, 22, 32.2);
+  if (v <= 0) return;
+  withAlpha(v, () => {
+    text('So ist es aufgebaut', 80, 220, { size: 84, weight: 800, a: prog(t, 22.2, 22.8) });
+    // host
+    pop(prog(t, 22.8, 23.6), W / 2, 560, () => {
+      box(80, 380, 920, 400, C.panel, 28);
+      text('Host', 130, 410, { size: 52, weight: 800, color: C.blue });
+      text('die KI-App, z. B. Claude', 280, 422, { size: 38, color: C.soft });
+    });
+    pop(prog(t, 24, 24.8), W / 2, 640, () => {
+      box(130, 520, 820, 210, C.panel2, 22, C.blue);
+      text('MCP-Client', 180, 555, { size: 52, weight: 800 });
+      text('spricht das Protokoll mit genau einem Server', 180, 630, { size: 36, color: C.soft });
+    });
+    arrow(W / 2, 800, W / 2, 900, easeOut(prog(t, 25.4, 26)), C.green, 8);
+    pop(prog(t, 25.9, 26.7), W / 2, 1020, () => {
+      box(80, 920, 920, 210, C.panel2, 22, C.green);
+      text('MCP-Server', 130, 955, { size: 52, weight: 800, color: C.green });
+      text('übersetzt zwischen MCP und einem Dienst, z. B. ein Kalender-Server', 130, 1030, { size: 36, color: C.soft, maxW: 820 });
+    });
+    arrow(W / 2, 1150, W / 2, 1250, easeOut(prog(t, 27.3, 27.9)), C.amber, 8);
+    pop(prog(t, 27.8, 28.6), W / 2, 1360, () => {
+      box(80, 1270, 920, 180, C.panel2, 22, C.amber);
+      text('Dienst / API', 130, 1300, { size: 52, weight: 800, color: C.amber });
+      text('dein echter Google Kalender, Gmail, CRM …', 130, 1375, { size: 36, color: C.soft });
+    });
+    text('Ein Host kann viele Server gleichzeitig nutzen – pro Server ein Client.', 80, 1540, { size: 42, a: prog(t, 29, 29.7) });
+    text('Lokal auf deinem Rechner oder übers Internet.', 80, 1680, { size: 42, color: C.soft, a: prog(t, 30, 30.7) });
+  });
+}
+
+/* ---------------- scene 5: what a server offers ---------------- */
+function s5(t) {
+  const v = vis(t, 32, 40.2);
+  if (v <= 0) return;
+  withAlpha(v, () => {
+    text('Was ein Server anbietet', 80, 220, { size: 84, weight: 800, a: prog(t, 32.2, 32.8) });
+    const cards = [
+      ['Tools', 'Aktionen ausführen', 'create_event · send_email', C.green],
+      ['Resources', 'Daten zum Lesen bereitstellen', 'Dateien · Kalendereinträge', C.blue],
+      ['Prompts', 'Fertige Vorlagen für Aufgaben', '„Wochenbericht erstellen“', C.amber]
+    ];
+    cards.forEach(([h, d, ex, col], i) => {
+      const y = 480 + i * 340, a = prog(t, 33 + i * 1.3, 33.7 + i * 1.3);
+      pop(a, W / 2, y + 150, () => {
+        box(80, y, 920, 300, C.panel, 26);
+        rrect(80, y, 18, 300, 9); ctx.fillStyle = col; ctx.fill();
+        text(h, 140, y + 40, { size: 64, weight: 800, color: col });
+        text(d, 140, y + 130, { size: 44 });
+        text(ex, 140, y + 210, { size: 34, color: C.soft, font: MONO });
+      });
+    });
+    text('Die KI sieht diese Liste und entscheidet selbst, was sie braucht.', 80, 1540, { size: 42, a: prog(t, 37.4, 38.1) });
+  });
+}
+
+/* ---------------- scene 6: example as sequence ---------------- */
+const COLX = [190, 540, 890];
+function s6(t) {
+  const v = vis(t, 40, 56.2);
+  if (v <= 0) return;
+  withAlpha(v, () => {
+    text('Ein Beispiel', 80, 160, { size: 84, weight: 800, a: prog(t, 40.2, 40.8) });
+    // user bubble
+    pop(prog(t, 40.8, 41.6), W / 2, 340, () => {
+      box(180, 280, 820, 150, C.blue, 30);
+      text('„Trag das Meeting morgen um 10 Uhr in meinen Kalender ein.“', 220, 305, { size: 38, weight: 600, color: '#08121b', maxW: 750 });
+      text('Du', 80, 330, { size: 40, weight: 800, color: C.blue });
+    });
+    // column heads + lifelines
+    const heads = [['Claude', 'Host + Client', C.blue], ['MCP-Server', 'Kalender', C.green], ['Google', 'Kalender-API', C.amber]];
+    heads.forEach(([h, s, col], i) => {
+      const a = prog(t, 42 + i * .2, 42.6 + i * .2);
+      pop(a, COLX[i], 560, () => {
+        box(COLX[i] - 160, 500, 320, 130, C.panel2, 20, col);
+        text(h, COLX[i], 515, { size: 40, weight: 800, align: 'center', color: col });
+        text(s, COLX[i], 568, { size: 30, align: 'center', color: C.soft });
+      });
+      withAlpha(a * .5, () => line(COLX[i], 650, COLX[i], 1440, easeOut(prog(t, 42.4, 43.4)), '#3a434f', 4));
+    });
+    // messages: from, to, y, label, start, end, colour, caption
+    const msgs = [
+      [0, 1, 720, 'tools/list', 43.6, 44.4, C.soft],
+      [1, 0, 810, 'create_event, …', 44.8, 45.6, C.green],
+      [0, 1, 920, 'tools/call create_event', 46.6, 47.6, C.blue],
+      [1, 2, 1110, 'API-Aufruf', 49.2, 50, C.amber],
+      [2, 1, 1200, 'OK', 50.4, 51, C.amber],
+      [1, 0, 1300, 'Ergebnis: Termin erstellt', 51.4, 52.2, C.green]
+    ];
+    msgs.forEach(([f, to, y, label, a0, a1, col]) => {
+      const p = easeInOut(prog(t, a0, a1));
+      const dir = to > f ? 1 : -1;
+      arrow(COLX[f] + dir * 12, y, COLX[to] - dir * 12, y, p, col, 6);
+      text(label, (COLX[f] + COLX[to]) / 2, y - 50, { size: 32, weight: 600, align: 'center', color: col, font: MONO, a: prog(t, a0 + .2, a1) });
+    });
+    // json payload
+    pop(prog(t, 47.6, 48.3), 540, 1010, () => {
+      box(260, 960, 560, 92, '#0b0e12', 16, '#3a434f');
+      text('{ "titel": "Meeting", "start": "10:00" }', 540, 990, { size: 26, align: 'center', font: MONO, color: C.ink });
+    });
+    // Claude answer
+    pop(prog(t, 52.8, 53.6), W / 2, 1530, () => {
+      box(80, 1460, 820, 150, C.panel2, 30, C.green);
+      text('Erledigt! Das Meeting steht morgen um 10 Uhr in deinem Kalender.', 120, 1488, { size: 38, weight: 600, maxW: 740 });
+    });
+    // running caption
+    const caps = [
+      [42, 'Claude kennt die Werkzeuge des Servers – der Client hat sie beim Verbinden abgefragt.'],
+      [46.2, 'Claude wählt das passende Tool und schickt die Daten im festen MCP-Format.'],
+      [48.9, 'Der Server ruft den echten Kalender auf.'],
+      [51.3, 'Das Ergebnis geht zurück – Claude antwortet dir.']
+    ];
+    let cur = null, start = 0;
+    caps.forEach(([s, c]) => { if (t >= s) { cur = c; start = s; } });
+    if (cur && t < 53) text(cur, 80, 1690, { size: 38, color: C.soft, a: prog(t, start, start + .4) });
+    if (t >= 53) text('Vor Aktionen fragt die App dich in der Regel um Erlaubnis.', 80, 1690, { size: 38, color: C.soft, a: prog(t, 53.4, 53.9) });
+  });
+}
+
+/* ---------------- scene 7: outro ---------------- */
+function s7(t) {
+  const v = prog(t, 56, 56.5);
+  if (v <= 0) return;
+  withAlpha(v, () => {
+    text('Ein Protokoll.', 80, 520, { size: 120, weight: 800, a: prog(t, 56.2, 56.8) });
+    text('Jede KI.', 80, 660, { size: 120, weight: 800, color: C.blue, a: prog(t, 56.9, 57.5) });
+    text('Jedes Tool.', 80, 800, { size: 120, weight: 800, color: C.green, a: prog(t, 57.6, 58.2) });
+    text('MCP verbindet KI-Assistenten mit deinen Apps und Daten – sicher, standardisiert und einmal gebaut für alle.', 80, 1040, { size: 46, color: C.soft, a: prog(t, 58.6, 59.3) });
+    pop(prog(t, 60, 60.8), 540, 1420, () => {
+      ctx.beginPath(); ctx.arc(540, 1420, 110, 0, Math.PI * 2); ctx.fillStyle = C.green; ctx.fill();
+      text('MCP', 540, 1386, { size: 64, weight: 800, align: 'center', color: '#0b1a12' });
+    });
+  });
+}
+
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  s1(t); s23(t); s4(t); s5(t); s6(t); s7(t);
+  // progress bar
+  ctx.fillStyle = '#232a33'; ctx.fillRect(0, H - 14, W, 14);
+  ctx.fillStyle = C.green; ctx.fillRect(0, H - 14, W * clamp(t / DURATION), 14);
+}
+window.render = render; window.DURATION = DURATION;
+
+// preview mode: plays in the browser when not rendering
+if (!location.search.includes('render')) {
+  const t0 = performance.now();
+  (function loop() { render(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); })();
+} else document.body.classList.add('render');
+</script>
+</body>
+</html>
