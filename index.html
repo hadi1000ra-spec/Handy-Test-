@@ -31,7 +31,7 @@
 
   --margin: clamp(16px, 2vw, 28px);
   --gap-section: clamp(120px, 14vw, 200px);
-  --radius: 14px;
+  --radius: 0px;
   --ease: cubic-bezier(.2,.7,.2,1);
   font-family: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -176,7 +176,7 @@ section { scroll-margin-top: 24px; }
 .crm .fields span { color: var(--muted); }
 .crm .fields .tag { color: var(--accent-ink); }
 .crm .fields b { font-weight: 600; }
-.tag { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.tag { display: inline-block; padding: 2px 10px; border-radius: 0; background: var(--accent); color: var(--accent-ink); font-weight: 600; }
 .crm .task { margin: 8px 20px 20px; padding: 14px 16px; background: var(--surface); }
 .crm .task b { display: block; }
 .crm .task span { color: var(--muted); }
@@ -202,6 +202,18 @@ section { scroll-margin-top: 24px; }
 .how .after li { padding: 12px 0; font-weight: 600; }
 .how .after li + li { border-top: 0; }
 .how .after li span { display: block; font-weight: 400; }
+
+/* ---------- about: the person behind it ---------- */
+.about { margin-top: var(--gap-section); }
+.about .text { grid-column: 1 / 7; }
+.about h2 { margin-bottom: 28px; }
+.about .text p + p { margin-top: 18px; }
+.about .statement { font-size: var(--step-lead); line-height: 1.35; }
+.about .note-card { grid-column: 8 / 13; background: var(--ink); color: var(--bg); padding: clamp(28px, 3vw, 48px); align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; }
+.about .note-card p { font-size: var(--step-lead); line-height: 1.35; }
+.about .sig { font-size: var(--step-head); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.about .sig span { display: block; margin-top: 10px; font-size: var(--step-body); font-weight: 400; letter-spacing: 0; color: color-mix(in srgb, var(--bg) 80%, var(--ink)); }
+@media (max-width: 980px) { .about .text, .about .note-card { grid-column: 1 / -1; } .about .note-card { margin-top: 40px; } }
 
 /* ---------- pricing ---------- */
 .pricing { margin-top: var(--gap-section); background: var(--surface); padding-block: clamp(80px, 10vw, 140px); min-height: 80svh; display: flex; flex-direction: column; justify-content: center; }
@@ -304,6 +316,7 @@ section { scroll-margin-top: 24px; }
     <ul>
       <li class="opt"><a href="#ausprobieren">Ausprobieren</a></li>
       <li class="opt"><a href="#ablauf">Ablauf</a></li>
+      <li class="opt"><a href="#ueber-mich">Über mich</a></li>
       <li><a href="#preis">Preis</a></li>
       <li class="opt"><a href="#fragen">Fragen</a></li>
       <li><a class="btn" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">Gespräch buchen</a></li>
@@ -326,9 +339,9 @@ section { scroll-margin-top: 24px; }
 <main>
   <section class="intro wrap split" aria-labelledby="h-intro">
     <div class="text">
-      <h2 id="h-intro" class="head rv">Sonntag, 21:47 Uhr.</h2>
-      <p class="statement rv" style="--i:1">Anfragen kommen über Ihre Website, ImmoScout24 und Immowelt. Oft dann, wenn Sie gerade besichtigen, telefonieren oder Feierabend haben.</p>
-      <p class="rv" style="--i:2">Bis Montagmorgen liegen sie in drei Postfächern, keiner ist im CRM, und der Interessent hat längst beim nächsten Büro nachgefragt. Genau diese Lücke schließe ich: Die erste Antwort geht raus, während Sie noch nicht einmal wissen, dass die Anfrage da ist.</p>
+      <h2 id="h-intro" class="head">Sonntag, 21:47 Uhr.</h2>
+      <p class="statement">Anfragen kommen über Ihre Website, ImmoScout24 und Immowelt. Oft dann, wenn Sie gerade besichtigen, telefonieren oder Feierabend haben.</p>
+      <p>Bis Montagmorgen liegen sie in drei Postfächern, keiner ist im CRM, und der Interessent hat längst beim nächsten Büro nachgefragt. Genau diese Lücke schließe ich: Die erste Antwort geht raus, während Sie noch nicht einmal wissen, dass die Anfrage da ist.</p>
     </div>
     <div class="inbox rv" style="--i:2" data-ui role="img" aria-label="Beispiel-Postfach mit vier unbeantworteten Anfragen vom Wochenende">
       <header><span>Posteingang · Anfragen</span><span>4 ungelesen</span></header>
@@ -344,7 +357,7 @@ section { scroll-margin-top: 24px; }
   </section>
 
   <section class="showcase wrap" id="ausprobieren" aria-labelledby="h-try">
-    <h2 id="h-try" class="head rv">Schreiben Sie eine Anfrage.</h2>
+    <h2 id="h-try" class="head">Schreiben Sie eine Anfrage.</h2>
     <label class="visually-hidden" for="q">Anfrage eines Interessenten</label>
     <div class="ask rv" style="--i:1" data-ui>
       <input id="q" type="text" value="Was ist mein Haus wert?" autocomplete="off" spellcheck="false">
@@ -380,7 +393,7 @@ section { scroll-margin-top: 24px; }
   </section>
 
   <section class="how wrap" id="ablauf" aria-labelledby="h-how">
-    <h2 id="h-how" class="display rv">Vom Gespräch zum Go-live.</h2>
+    <h2 id="h-how" class="display">Vom Gespräch zum Go-live.</h2>
     <ol class="stages" data-ui>
       <li class="stage" style="flex-grow:2">
         <div class="seg rv">Gemeinsam</div>
@@ -404,54 +417,67 @@ section { scroll-margin-top: 24px; }
       </li>
     </ol>
     <div class="after">
-      <p class="rv">Die Automatisierung läuft in Ihrem Konto, nicht in meinem. Wenn wir aufhören zusammenzuarbeiten, gehört sie weiter Ihnen.</p>
-      <ul class="rv" style="--i:1">
+      <p>Die Automatisierung läuft in Ihrem Konto, nicht in meinem. Wenn wir aufhören zusammenzuarbeiten, gehört sie weiter Ihnen.</p>
+      <ul>
         <li>Was ich von Ihnen brauche<span>Zugang zu Ihrem CRM und Ihren Anfragequellen sowie die Freigabe Ihres Gmail- oder Outlook-Postfachs für die Antworten.</span></li>
         <li>Was Sie danach haben<span>Ein Anfrageformular, automatische CRM-Einträge, Antworten mit Terminvorschlag und eine Aufgabe für jede neue Anfrage.</span></li>
       </ul>
     </div>
   </section>
 
+  <section class="about wrap split" id="ueber-mich" aria-labelledby="h-about">
+    <div class="text">
+      <h2 id="h-about" class="head">Hallo, ich bin Hadi.</h2>
+      <p class="statement">Atayi Labs bin ich. Ich richte für kleine, inhabergeführte Maklerbüros ein, dass keine Anfrage mehr liegen bleibt.</p>
+      <p>Ich komme nicht aus der Immobilienbranche. Deshalb frage ich im ersten Gespräch viel: wie Sie heute arbeiten, welche Anfragen Ihnen wichtig sind und wie Sie mit Interessenten sprechen. Erst dann baue ich etwas.</p>
+      <p>Atayi Labs ist neu. Darum suche ich zuerst wenige Pilotkunden, die das System günstiger bekommen und mir ehrlich sagen, was noch nicht passt.</p>
+    </div>
+    <aside class="note-card" aria-label="Persönliche Notiz">
+      <p>Sie sprechen immer direkt mit mir: im ersten Gespräch, beim Einrichten und wenn später etwas hakt. Kein Callcenter, keine Weitergabe.</p>
+      <div class="sig">Hadi<span>Atayi Labs</span></div>
+    </aside>
+  </section>
+
   <section class="pricing" id="preis" aria-labelledby="h-price">
     <div class="wrap">
-      <h2 id="h-price" class="display rv">Startklar für <span class="price">690&nbsp;€</span> einmalig.</h2>
+      <h2 id="h-price" class="display">Startklar für <span class="price">690&nbsp;€</span> einmalig.</h2>
       <div class="base">
-        <p class="rv" style="--i:1">Enthalten: Anfrageformular, automatischer CRM-Eintrag, Antwort-E-Mails für Käufer, Verkäufer, Bewertung und Beratung mit Terminvorschlag und eine Aufgabe im CRM. Fällig erst nach Go-live, mit 14 Tagen Zahlungsziel.</p>
-        <div class="go rv" style="--i:2"><a class="btn" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">Gespräch buchen <span class="arrow" aria-hidden="true">→</span></a></div>
+        <p>Enthalten: Anfrageformular, automatischer CRM-Eintrag, Antwort-E-Mails für Käufer, Verkäufer, Bewertung und Beratung mit Terminvorschlag und eine Aufgabe im CRM. Fällig erst nach Go-live, mit 14 Tagen Zahlungsziel.</p>
+        <div class="go"><a class="btn" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">Gespräch buchen <span class="arrow" aria-hidden="true">→</span></a></div>
       </div>
       <div class="terms">
-        <div class="rv" style="--i:1"><b>Pilotkunden: 345&nbsp;€</b><p>Atayi Labs ist neu. Wenige Pilotkunden bekommen 50&nbsp;% auf die Einrichtung und geben mir dafür ehrliches Feedback und eine Referenz.</p></div>
-        <div class="rv" style="--i:2"><b>Anderes CRM: +290&nbsp;€</b><p>HubSpot ist inklusive. Für onOffice, Propstack, FlowFact oder ein anderes CRM kommt einmalig ein Aufpreis hinzu.</p></div>
-        <div class="rv" style="--i:3"><b>Betreuung: 99&nbsp;€ im Monat</b><p>Optional. Überwachung, Fehlerbehebung am selben oder nächsten Werktag, eine kleine Änderung pro Monat und ein Monatsbericht.</p></div>
+        <div><b>Pilotkunden: 345&nbsp;€</b><p>Atayi Labs ist neu. Wenige Pilotkunden bekommen 50&nbsp;% auf die Einrichtung und geben mir dafür ehrliches Feedback und eine Referenz.</p></div>
+        <div><b>Anderes CRM: +290&nbsp;€</b><p>HubSpot ist inklusive. Für onOffice, Propstack, FlowFact oder ein anderes CRM kommt einmalig ein Aufpreis hinzu.</p></div>
+        <div><b>Betreuung: 99&nbsp;€ im Monat</b><p>Optional. Überwachung, Fehlerbehebung am selben oder nächsten Werktag, eine kleine Änderung pro Monat und ein Monatsbericht.</p></div>
       </div>
     </div>
   </section>
 
   <section class="faq wrap" id="fragen" aria-labelledby="h-faq">
-    <div class="row"><h2 id="h-faq" class="rv">Ihre Fragen</h2></div>
+    <div class="row"><h2 id="h-faq">Ihre Fragen</h2></div>
     <div class="row">
-      <h3 class="rv">Funktioniert das mit meinem CRM?</h3>
-      <p class="rv" style="--i:1">Am einfachsten mit HubSpot, das ist im Preis enthalten. onOffice, Propstack, FlowFact und andere Systeme binde ich ebenfalls an; dafür fallen einmalig 290&nbsp;€ zusätzlich an.</p>
+      <h3>Funktioniert das mit meinem CRM?</h3>
+      <p>Am einfachsten mit HubSpot, das ist im Preis enthalten. onOffice, Propstack, FlowFact und andere Systeme binde ich ebenfalls an; dafür fallen einmalig 290&nbsp;€ zusätzlich an.</p>
     </div>
     <div class="row">
-      <h3 class="rv">Was ist mit ImmoScout24 und Immowelt?</h3>
-      <p class="rv" style="--i:1">Portalanfragen werden über die Benachrichtigungs-E-Mails der Portale eingelesen, nicht über eine Portal-Schnittstelle. Das biete ich als Erweiterung zum Festpreis an, den wir im Gespräch klären.</p>
+      <h3>Was ist mit ImmoScout24 und Immowelt?</h3>
+      <p>Portalanfragen werden über die Benachrichtigungs-E-Mails der Portale eingelesen, nicht über eine Portal-Schnittstelle. Das biete ich als Erweiterung zum Festpreis an, den wir im Gespräch klären.</p>
     </div>
     <div class="row">
-      <h3 class="rv">Wo liegen die Daten meiner Interessenten?</h3>
-      <p class="rv" style="--i:1">In Ihren eigenen Konten: in Ihrem CRM, Ihrem Postfach und Ihrem eigenen Automatisierungskonto. Die Einwilligung nach DSGVO ist im Anfrageformular enthalten.</p>
+      <h3>Wo liegen die Daten meiner Interessenten?</h3>
+      <p>In Ihren eigenen Konten: in Ihrem CRM, Ihrem Postfach und Ihrem eigenen Automatisierungskonto. Die Einwilligung nach DSGVO ist im Anfrageformular enthalten.</p>
     </div>
     <div class="row">
-      <h3 class="rv">Wann muss ich bezahlen?</h3>
-      <p class="rv" style="--i:1">Die Einrichtung zu 100&nbsp;% erst nach Go-live, mit 14 Tagen Zahlungsziel. Die Betreuung wird ab Go-live zum Monatsende abgerechnet.</p>
+      <h3>Wann muss ich bezahlen?</h3>
+      <p>Die Einrichtung zu 100&nbsp;% erst nach Go-live, mit 14 Tagen Zahlungsziel. Die Betreuung wird ab Go-live zum Monatsende abgerechnet.</p>
     </div>
     <div class="row">
-      <h3 class="rv">Wie komme ich aus der Betreuung wieder raus?</h3>
-      <p class="rv" style="--i:1">Es gibt keine Mindestlaufzeit. Sie kündigen mit 14 Tagen Frist zum Monatsende, eine E-Mail genügt. Größere Erweiterungen biete ich immer separat zum Festpreis an.</p>
+      <h3>Wie komme ich aus der Betreuung wieder raus?</h3>
+      <p>Es gibt keine Mindestlaufzeit. Sie kündigen mit 14 Tagen Frist zum Monatsende, eine E-Mail genügt. Größere Erweiterungen biete ich immer separat zum Festpreis an.</p>
     </div>
     <div class="row">
-      <h3 class="rv">Muss ich mich mit Technik auskennen?</h3>
-      <p class="rv" style="--i:1">Nein. Ich richte alles ein, zeige Ihnen jeden Schritt bei der Übergabe und bin bei Fragen innerhalb von 24 Stunden erreichbar, wenn Sie die Betreuung nutzen.</p>
+      <h3>Muss ich mich mit Technik auskennen?</h3>
+      <p>Nein. Ich richte alles ein, zeige Ihnen jeden Schritt bei der Übergabe und bin bei Fragen innerhalb von 24 Stunden erreichbar, wenn Sie die Betreuung nutzen.</p>
     </div>
   </section>
 </main>
@@ -459,9 +485,9 @@ section { scroll-margin-top: 24px; }
 <footer class="foot">
   <div class="wrap top">
     <div class="invite">
-      <h2 class="display rv">Keine Anfrage bleibt liegen.</h2>
-      <p class="rv" style="--i:1">In 15 Minuten klären wir, wie Anfragen heute bei Ihnen ankommen und ob die Automatisierung zu Ihrem Büro passt.</p>
-      <a class="btn rv" style="--i:2" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">Gespräch buchen <span class="arrow" aria-hidden="true">→</span></a>
+      <h2 class="display">Keine Anfrage bleibt liegen.</h2>
+      <p>In 15 Minuten klären wir, wie Anfragen heute bei Ihnen ankommen und ob die Automatisierung zu Ihrem Büro passt.</p>
+      <a class="btn" href="https://meetings-eu1.hubspot.com/hadi-attai" target="_blank" rel="noopener">Gespräch buchen <span class="arrow" aria-hidden="true">→</span></a>
     </div>
     <nav aria-label="Fußzeile">
       <ul>
